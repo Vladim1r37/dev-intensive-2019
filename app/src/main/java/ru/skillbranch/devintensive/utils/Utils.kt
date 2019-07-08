@@ -26,6 +26,7 @@ object Utils {
         val parts: List<String> = payload.split("\\s+".toRegex())
 
         return buildString {
+            var i = 0
             for (string in parts) {
                 for (char in string) {
                     val index = rusLetters.indexOf(char)
@@ -35,7 +36,8 @@ object Utils {
                         append(engLetters[index])
                     }
                 }
-                if (parts.indexOf(string) < parts.size - 1) append(divider)
+                i++
+                if (i < parts.size) append(divider)
             }
         }
     }
@@ -44,7 +46,9 @@ object Utils {
         val firstInitial = parseInitial(firstName)
         val lastInitial = parseInitial(lastName)
 
-        return if (lastInitial == null) firstInitial else firstInitial + lastInitial
+        return if (firstInitial != null) {
+            if (lastInitial != null) firstInitial + lastInitial else firstInitial
+        } else lastInitial
     }
 
     private fun parseInitial(name: String?): String? {

@@ -29,28 +29,19 @@ fun Date.add(value: Int, units: TimeUnits = TimeUnits.SECOND): Date {
 
 fun Date.humanizeDiff(date: Date = Date()): String {
     val interval = date.time - this.time
+    var prefix = ""
+    var postfix = ""
+    if (interval > 0) postfix = " назад" else prefix = "через "
 
     return when (interval.absoluteValue) {
-        in 1..1000 -> "только что"
-        in 1001..45000 -> if (interval > 0) "несколько секунд назад" else "через несколько секунд"
-        in 45001..75000 -> if (interval > 0) "минуту назад" else "через несколько минут"
-        in 75001..2700000 -> if (interval > 0) {
-            "${getVerboseInterval(interval.absoluteValue, TimeUnits.MINUTE)} назад"
-        } else {
-            "через ${getVerboseInterval(interval.absoluteValue, TimeUnits.MINUTE)}"
-        }
-        in 2700001..4500000 -> if (interval > 0) "час назад" else "через час"
-        in 4500001..79200000 -> if (interval > 0) {
-            "${getVerboseInterval(interval.absoluteValue, TimeUnits.HOUR)} назад"
-        } else {
-            "через ${getVerboseInterval(interval.absoluteValue, TimeUnits.HOUR)}"
-        }
-        in 79200001..93600000 -> if (interval > 0) "день назад" else "через день"
-        in 93600001..31104000000 -> if (interval > 0) {
-            "${getVerboseInterval(interval.absoluteValue, TimeUnits.DAY)} назад"
-        } else {
-            "через ${getVerboseInterval(interval.absoluteValue, TimeUnits.DAY)}"
-        }
+        in 0..1 * SECOND -> "только что"
+        in 1 * SECOND..45 * SECOND -> prefix + "несколько секунд$postfix"
+        in 45 * SECOND..75 * SECOND -> prefix + "минуту$postfix"
+        in 75 * SECOND..45 * MINUTE -> prefix + "${getVerboseInterval(interval, TimeUnits.MINUTE)}$postfix"
+        in 45 * MINUTE..75 * MINUTE -> prefix + "час$postfix"
+        in 75 * MINUTE..22 * HOUR -> prefix + "${getVerboseInterval(interval, TimeUnits.HOUR)}$postfix"
+        in 22 * HOUR..26 * HOUR -> prefix + "день$postfix"
+        in 26 * HOUR..360 * DAY -> prefix + "${getVerboseInterval(interval, TimeUnits.DAY)}$postfix"
         else -> if (interval > 0) "более года назад" else "более чем через год"
     }
 }
@@ -62,44 +53,47 @@ fun getVerboseInterval(interval: Long, units: TimeUnits): String {
         TimeUnits.HOUR -> HOUR
         TimeUnits.DAY -> DAY
     }
-    val number = Math.ceil(interval.toDouble() / unitValue).toInt()
+    val number = if (interval < 0) Math.ceil(interval.absoluteValue.toDouble() / unitValue).toInt()
+    else Math.floor(interval.toDouble() / unitValue).toInt()
 
-    val unitName = when (units) {
-        TimeUnits.SECOND -> when (number) {
-            1 -> "секунда"
-            in 2..4 -> "секунды"
-            else -> "секунд"
-        }
-        TimeUnits.MINUTE -> when (number) {
-            1 -> "минута"
-            in 2..4 -> "минуты"
-            else -> "минут"
-        }
-        TimeUnits.HOUR -> when (number) {
-            1 -> "час"
-            21 -> "час"
-            in 2..4 -> "часа"
-            22 -> "часа"
-            else -> "часов"
-        }
-        TimeUnits.DAY -> when (number) {
-            1 -> "день"
-            in 2..4 -> "дня"
-            in 5..20 -> "дней"
-            else -> when (number%10) {
-                1 -> "день"
-                in 2..4 -> "дня"
-                else -> "дней"
-            }
-        }
-    }
 
-    return "$number $unitName"
+    return units.plural(number)
 }
 
 enum class TimeUnits {
     SECOND,
     MINUTE,
     HOUR,
-    DAY
+    DAY;
+
+    fun plural(num: Int): String {
+        return "$num ${
+        when (this) {
+            SECOND -> {
+                val declensions = arrayOf("секунду", "секунды", "секунд")
+                declensions[getDescIndex(num)]
+            }
+            MINUTE -> {
+                val declensions = arrayOf("минуту", "минуты", "минут")
+                declensions[getDescIndex(num)]
+            }
+            HOUR -> {
+                val declensions = arrayOf("час", "часа", "часов")
+                declensions[getDescIndex(num)]
+            }
+            DAY -> {
+                val declensions = arrayOf("день", "дня", "дней")
+                declensions[getDescIndex(num)]
+            }
+        }
+        }"
+    }
+
+    private fun getDescIndex(num: Int): Int {
+        return if (num in 11..14) 2 else when (num % 10) {
+            1 -> 0
+            in 2..4 -> 1
+            else -> 2
+        }
+    }
 }
