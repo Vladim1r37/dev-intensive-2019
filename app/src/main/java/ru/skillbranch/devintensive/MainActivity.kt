@@ -5,6 +5,7 @@ import android.graphics.PorterDuff
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
@@ -28,7 +29,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 //        benderImage = findViewById(R.id.iv_bender)
         benderImage = iv_bender
         textTxt = tv_text
-        messageEt = et_message
+        messageEt = et_message.apply {
+            setOnEditorActionListener { _, actionId, _ ->
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    onClick(sendBtn)
+                }
+                false
+            }
+        }
         sendBtn = iv_send
 
         val status = savedInstanceState?.getString("STATUS") ?: Bender.Status.NORMAL.name
@@ -41,6 +49,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
         textTxt.text = benderObj.askQuestion()
         sendBtn.setOnClickListener(this)
+
     }
 
     override fun onRestart() {
@@ -75,7 +84,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onClick(v: View?) {
         if (v?.id == R.id.iv_send) {
-            val (phrase, color) = benderObj.listenAnswer(messageEt.text.toString().toLowerCase())
+            val (phrase, color) = benderObj.listenAnswer(messageEt.text.toString())
             messageEt.setText("")
             val (r, g, b) = color
             benderImage.setColorFilter(Color.rgb(r, g, b), PorterDuff.Mode.MULTIPLY)
@@ -88,6 +97,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
         outState?.putString("STATUS", benderObj.status.name)
         outState?.putString("QUESTION", benderObj.question.name)
-        Log.d("M_MainActivity","onSaveInstanceState ${benderObj.status.name} ${benderObj.question.name}")
+        Log.d("M_MainActivity", "onSaveInstanceState ${benderObj.status.name} ${benderObj.question.name}")
     }
 }

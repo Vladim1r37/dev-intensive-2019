@@ -12,17 +12,21 @@ class Bender(var status: Status = Status.NORMAL, var question: Question = Questi
     }
 
     fun listenAnswer(answer: String): Pair<String, Triple<Int, Int, Int>> {
-        return if (question.answers.contains(answer)) {
-            question = question.nextQuestion()
-            "Отлично - ты справился\n${question.question}" to status.color
+        return if (question.isAnswerValid(answer)) {
+            if (question.answers.contains(answer.toLowerCase())) {
+                question = question.nextQuestion()
+                "Отлично - ты справился\n${question.question}" to status.color
+            } else {
+                val oldStatus = status
+                status = status.nextStatus()
+                if (oldStatus == status) {
+                    status = Status.NORMAL
+                    question = Question.NAME
+                    "Это неправильный ответ. Давай все по новой\n${question.question}" to status.color
+                } else "Это неправильный ответ\n${question.question}" to status.color
+            }
         } else {
-            val oldStatus = status
-            status = status.nextStatus()
-            if (oldStatus == status) {
-                status = Status.NORMAL
-                question = Question.NAME
-                "Это неправильный ответ. Давай все по новой\n${question.question}" to status.color
-            } else "Это неправильный ответ\n${question.question}" to status.color
+            "${question.validationErrorMessage}${question.question}" to status.color
         }
     }
 
@@ -41,26 +45,64 @@ class Bender(var status: Status = Status.NORMAL, var question: Question = Questi
         }
     }
 
-    enum class Question(val question: String, val answers: List<String>) {
-        NAME("Как меня зовут?", listOf("бендер", "bender")) {
+    enum class Question(
+        val question: String,
+        val answers: List<String>,
+        val validationErrorMessage: String
+    ) {
+        NAME(
+            "Как меня зовут?",
+            listOf("бендер", "bender"),
+            "Имя должно начинаться с заглавной буквы\n"
+        ) {
+            override fun isAnswerValid(answer: String): Boolean = answer[0].isUpperCase()
+
             override fun nextQuestion(): Question = PROFESSION
         },
-        PROFESSION("Назови мою профессию?", listOf("сгибальщик", "bender")) {
+        PROFESSION(
+            "Назови мою профессию?",
+            listOf("сгибальщик", "bender"),
+            "Профессия должна начинаться со строчной буквы\n"
+        ) {
+            override fun isAnswerValid(answer: String): Boolean = answer[0].isLowerCase()
+
             override fun nextQuestion(): Question = MATERIAL
         },
-        MATERIAL("Из чего я сделан?", listOf("металл", "дерево", "metal", "iron", "wood")) {
+        MATERIAL(
+            "Из чего я сделан?",
+            listOf("металл", "дерево", "metal", "iron", "wood"),
+            "Материал не должен содержать цифр\n"
+        ) {
+            override fun isAnswerValid(answer: String): Boolean = answer.contains("^\\D*$".toRegex())
+
             override fun nextQuestion(): Question = BDAY
         },
-        BDAY("Когда меня создали?", listOf("2993")) {
+        BDAY(
+            "Когда меня создали?",
+            listOf("2993"),
+            "Год моего рождения должен содержать только цифры\n"
+        ) {
+            override fun isAnswerValid(answer: String): Boolean = answer.contains("^\\d*$".toRegex())
+
             override fun nextQuestion(): Question = SERIAL
         },
-        SERIAL("Мой серийный номер?", listOf("2716057")) {
+        SERIAL(
+            "Мой серийный номер?",
+            listOf("2716057"),
+            "Серийный номер содержит только цифры, и их 7\n"
+        ) {
+            override fun isAnswerValid(answer: String): Boolean = answer.contains("^\\d{7}$".toRegex())
+
             override fun nextQuestion(): Question = IDLE
         },
-        IDLE("На этом все, вопросов больше нет", listOf()) {
+        IDLE("На этом все, вопросов больше нет", listOf(),"") {
+            override fun isAnswerValid(answer: String): Boolean = false
+
             override fun nextQuestion(): Question = IDLE
         };
 
         abstract fun nextQuestion(): Question
+
+        abstract fun isAnswerValid(answer: String): Boolean
     }
 }
