@@ -4,6 +4,8 @@ import android.graphics.ColorFilter
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.View
 import android.widget.EditText
@@ -11,9 +13,11 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import com.google.android.material.textfield.TextInputLayout
 import kotlinx.android.synthetic.main.activity_profile.*
 import ru.skillbranch.devintensive.R
 import ru.skillbranch.devintensive.models.Profile
+import ru.skillbranch.devintensive.utils.Utils
 import ru.skillbranch.devintensive.viewmodels.ProfileViewModel
 
 class ProfileActivity : AppCompatActivity() {
@@ -25,8 +29,10 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var viewModel: ProfileViewModel
     var isEditMode = false
     lateinit var viewFields: Map<String, TextView>
+    lateinit var repoTextInputLayout: TextInputLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        setTheme(R.style.AppTheme)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
         initViews(savedInstanceState)
@@ -53,8 +59,14 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun updateUI(profile: Profile) {
+        if (iv_avatar.drawable == getDrawable(R.drawable.ic_avatar)) {
+            val initials = Utils.toInitials(profile.firstName, profile.lastName)
+            initials?.let {
+                iv_avatar.generateAvatar(it, theme)
+            }
+        }
         profile.toMap().also {
-            for ((k,v) in viewFields) {
+            for ((k, v) in viewFields) {
                 v.text = it[k].toString()
             }
         }
@@ -76,7 +88,7 @@ class ProfileActivity : AppCompatActivity() {
         showCurrentMode(isEditMode)
 
         btn_edit.setOnClickListener {
-            if(isEditMode) saveProfileInfo()
+            if (isEditMode) saveProfileInfo()
             isEditMode = !isEditMode
             showCurrentMode(isEditMode)
         }
@@ -84,11 +96,35 @@ class ProfileActivity : AppCompatActivity() {
         btn_switch_theme.setOnClickListener {
             viewModel.switchTheme()
         }
+
+        repoTextInputLayout = wr_repository
+
+        et_repository.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if (!s.toString().matches(
+                        ("(^\$)|^(?=(https://|www)*\\.*github\\.com/\\w+)" +
+                                "(?!.*\\b(enterprise|features|topics|collections|trending|" +
+                                "events|marketplace|pricing|nonprofit|customer-stories|" +
+                                "security|login|join|tree)\\b).*\$").toRegex()
+                    )
+                ) {
+                    wr_repository.error = getString(R.string.profile_error_repository)
+                } else {
+                    wr_repository.error = ""
+                }
+            }
+        })
     }
 
     private fun showCurrentMode(isEdit: Boolean) {
-var info = viewFields.filter { setOf("firstName", "lastName", "about", "repository").contains(it.key) }
-        for ((_,v) in info) {
+        var info = viewFields.filter { setOf("firstName", "lastName", "about", "repository").contains(it.key) }
+        for ((_, v) in info) {
             v as EditText
             v.isFocusable = isEdit
             v.isFocusableInTouchMode = isEdit
@@ -100,7 +136,7 @@ var info = viewFields.filter { setOf("firstName", "lastName", "about", "reposito
         wr_about.isCounterEnabled = isEdit
 
         with(btn_edit) {
-            val filter: ColorFilter? = if(isEdit) {
+            val filter: ColorFilter? = if (isEdit) {
                 PorterDuffColorFilter(
                     resources.getColor(R.color.color_accent, theme),
                     PorterDuff.Mode.SRC_IN
@@ -121,6 +157,9 @@ var info = viewFields.filter { setOf("firstName", "lastName", "about", "reposito
     }
 
     private fun saveProfileInfo() {
+        if (!wr_repository.error?.equals("")!!) {
+            et_repository.text.clear()
+        }
         Profile(
             firstName = et_first_name.text.toString(),
             lastName = et_last_name.text.toString(),
