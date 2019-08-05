@@ -59,11 +59,9 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun updateUI(profile: Profile) {
-        if (iv_avatar.drawable == getDrawable(R.drawable.ic_avatar)) {
-            val initials = Utils.toInitials(profile.firstName, profile.lastName)
-            initials?.let {
-                iv_avatar.generateAvatar(it, theme)
-            }
+        val initials = Utils.toInitials(profile.firstName, profile.lastName)
+        initials?.let {
+            iv_avatar.generateAvatar(it, theme)
         }
         profile.toMap().also {
             for ((k, v) in viewFields) {

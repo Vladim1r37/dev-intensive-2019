@@ -11,7 +11,8 @@ data class Profile(
     val respect: Int = 0
 ) {
 
-    val nickName: String = "${Utils.transliteration(firstName)}_${Utils.transliteration(lastName)}"
+    val divider = if (firstName != "" && lastName != "") "_" else ""
+    val nickName: String = "${Utils.transliteration(firstName)}$divider${Utils.transliteration(lastName)}"
     val rank: String = "Junior Android Developer"
 
     fun toMap(): Map<String, Any> = mapOf(
