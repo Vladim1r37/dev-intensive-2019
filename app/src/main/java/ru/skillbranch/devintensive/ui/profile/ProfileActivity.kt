@@ -97,8 +97,6 @@ class ProfileActivity : AppCompatActivity() {
             viewModel.switchTheme()
         }
 
-        repoTextInputLayout = wr_repository
-
         et_repository.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
             }
@@ -107,19 +105,24 @@ class ProfileActivity : AppCompatActivity() {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                if (!s.toString().matches(
-                        ("(^\$)|^(?=(https://|www)*\\.*github\\.com/\\w+)" +
-                                "(?!.*\\b(enterprise|features|topics|collections|trending|" +
-                                "events|marketplace|pricing|nonprofit|customer-stories|" +
-                                "security|login|join|tree)\\b).*\$").toRegex()
-                    )
-                ) {
-                    wr_repository.error = getString(R.string.profile_error_repository)
-                } else {
-                    wr_repository.error = ""
+                s?.let {
+                    if (it.isNotEmpty() && !isRepositoryValid(it)) {
+                        wr_repository.error = getString(R.string.profile_error_repository)
+                    } else {
+                        wr_repository.error = ""
+                    }
                 }
             }
         })
+    }
+
+    private fun isRepositoryValid(url: CharSequence): Boolean {
+        return url.matches(
+            ("^(?=(https://|www)*\\.*github\\.com/\\w+)" +
+                    "(?!.*\\b(enterprise|features|topics|collections|trending|" +
+                    "events|marketplace|pricing|nonprofit|customer-stories|" +
+                    "security|login|join|tree)\\b).*\$").toRegex()
+        )
     }
 
     private fun showCurrentMode(isEdit: Boolean) {
@@ -157,8 +160,8 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun saveProfileInfo() {
-        if (!wr_repository.error?.equals("")!!) {
-            et_repository.text.clear()
+        if (!isRepositoryValid(et_repository.text)) {
+            et_repository.setText("")
         }
         Profile(
             firstName = et_first_name.text.toString(),
