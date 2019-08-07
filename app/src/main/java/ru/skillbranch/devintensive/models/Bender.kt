@@ -55,7 +55,8 @@ class Bender(var status: Status = Status.NORMAL, var question: Question = Questi
             listOf("бендер", "bender"),
             "Имя должно начинаться с заглавной буквы\n"
         ) {
-            override fun isAnswerValid(answer: String): Boolean = answer[0].isUpperCase()
+            override fun isAnswerValid(answer: String): Boolean =
+                if (answer.isNotEmpty()) answer[0].isUpperCase() else false
 
             override fun nextQuestion(): Question = PROFESSION
         },
@@ -64,7 +65,8 @@ class Bender(var status: Status = Status.NORMAL, var question: Question = Questi
             listOf("сгибальщик", "bender"),
             "Профессия должна начинаться со строчной буквы\n"
         ) {
-            override fun isAnswerValid(answer: String): Boolean = answer[0].isLowerCase()
+            override fun isAnswerValid(answer: String): Boolean =
+                if (answer.isNotEmpty()) answer[0].isLowerCase() else false
 
             override fun nextQuestion(): Question = MATERIAL
         },
@@ -95,7 +97,7 @@ class Bender(var status: Status = Status.NORMAL, var question: Question = Questi
 
             override fun nextQuestion(): Question = IDLE
         },
-        IDLE("На этом все, вопросов больше нет", listOf(),"") {
+        IDLE("На этом все, вопросов больше нет", listOf(), "") {
             override fun isAnswerValid(answer: String): Boolean = false
 
             override fun nextQuestion(): Question = IDLE
