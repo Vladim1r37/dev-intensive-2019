@@ -29,7 +29,6 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var viewModel: ProfileViewModel
     var isEditMode = false
     lateinit var viewFields: Map<String, TextView>
-    lateinit var repoTextInputLayout: TextInputLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.AppTheme)
@@ -60,9 +59,7 @@ class ProfileActivity : AppCompatActivity() {
 
     private fun updateUI(profile: Profile) {
         val initials = Utils.toInitials(profile.firstName, profile.lastName)
-        initials?.let {
-            iv_avatar.generateAvatar(it, theme)
-        }
+        iv_avatar.generateAvatar(initials, theme)
         profile.toMap().also {
             for ((k, v) in viewFields) {
                 v.text = it[k].toString()
@@ -105,8 +102,10 @@ class ProfileActivity : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 s?.let {
                     if (it.isNotEmpty() && !isRepositoryValid(it)) {
+                        wr_repository.isErrorEnabled = true
                         wr_repository.error = getString(R.string.profile_error_repository)
                     } else {
+                        wr_repository.isErrorEnabled = false
                         wr_repository.error = ""
                     }
                 }
@@ -117,9 +116,10 @@ class ProfileActivity : AppCompatActivity() {
     private fun isRepositoryValid(url: CharSequence): Boolean {
         return url.matches(
             ("^(?=(https://|www)*\\.*github\\.com/\\w+)" +
-                    "(?!.*\\b(enterprise|features|topics|collections|trending|" +
+                    "(?!.*[^-]\\b(enterprise|features|topics|collections|trending|" +
                     "events|marketplace|pricing|nonprofit|customer-stories|" +
-                    "security|login|join|tree)\\b).*\$").toRegex()
+                    "security|login|join|tree)\\b(?!-))(?!.*[_ ])(?!.*\\w\\/{2,})" +
+                    "(?!.*-{2,})(?!.*[-+!]\\w+[-+!]).*\$").toRegex()
         )
     }
 
