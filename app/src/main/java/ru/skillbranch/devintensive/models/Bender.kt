@@ -12,21 +12,21 @@ class Bender(var status: Status = Status.NORMAL, var question: Question = Questi
     }
 
     fun listenAnswer(answer: String): Pair<String, Triple<Int, Int, Int>> {
-        return if (question.isAnswerValid(answer)) {
-            if (question.answers.contains(answer.toLowerCase())) {
+        return if (question.answers.contains(answer.toLowerCase())) {
+            if (question.isAnswerValid(answer)) {
                 question = question.nextQuestion()
                 "Отлично - ты справился\n${question.question}" to status.color
             } else {
-                val oldStatus = status
-                status = status.nextStatus()
-                if (oldStatus == status) {
-                    status = Status.NORMAL
-                    question = Question.NAME
-                    "Это неправильный ответ. Давай все по новой\n${question.question}" to status.color
-                } else "Это неправильный ответ\n${question.question}" to status.color
+                "${question.validationErrorMessage}${question.question}" to status.color
             }
         } else {
-            "${question.validationErrorMessage}${question.question}" to status.color
+            val oldStatus = status
+            status = status.nextStatus()
+            if (oldStatus == status) {
+                status = Status.NORMAL
+                question = Question.NAME
+                "Это неправильный ответ. Давай все по новой\n${question.question}" to status.color
+            } else "Это неправильный ответ\n${question.question}" to status.color
         }
     }
 
@@ -95,7 +95,7 @@ class Bender(var status: Status = Status.NORMAL, var question: Question = Questi
 
             override fun nextQuestion(): Question = IDLE
         },
-        IDLE("На этом все, вопросов больше нет", listOf(),"") {
+        IDLE("На этом все, вопросов больше нет", listOf(), "") {
             override fun isAnswerValid(answer: String): Boolean = false
 
             override fun nextQuestion(): Question = IDLE
