@@ -16,37 +16,16 @@ data class Chat(
     var isArchived: Boolean = false
 ) {
 
-    fun unreadableMessageCount(): Int {
-        var count = 0
-        if (messages.isNotEmpty()) {
-            for (message in messages) {
-                if (!message.isReaded) count++
-            }
-        }
-        return count
+    fun unreadableMessageCount(): Int = messages.filter { !it.isReaded }.count()
+
+    fun lastMessageDate(): Date? = messages.lastOrNull()?.date
+
+    fun lastMessageShort(): Pair<String, String> = when (val lastMessage = messages.lastOrNull()) {
+        is TextMessage -> "${lastMessage.text}" to "${lastMessage.from.firstName}"
+        is ImageMessage -> "${lastMessage.from.firstName} - отправил фото" to "${lastMessage.from.firstName}"
+        else -> "" to ""
     }
 
-    fun lastMessageDate(): Date? {
-        return if (messages.isNotEmpty()) {
-            val lastMessage = messages[messages.lastIndex]
-            lastMessage.date
-        } else null
-    }
-
-    fun lastMessageShort(): Pair<String, String> {
-        return if (messages.isNotEmpty()) {
-            val lastMessage = messages[messages.lastIndex]
-            if (lastMessage is TextMessage) {
-                val text = lastMessage.text ?: ""
-                val author = lastMessage.from.firstName ?: ""
-                text to author
-            } else {
-                val author = lastMessage.from.firstName ?: ""
-                val text = "$author - отправил фото"
-                text to author
-            }
-        } else "" to ""
-    }
 
     private fun isSingle(): Boolean = members.size == 1
 

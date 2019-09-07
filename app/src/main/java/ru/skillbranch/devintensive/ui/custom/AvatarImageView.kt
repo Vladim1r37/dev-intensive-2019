@@ -36,7 +36,6 @@ class AvatarImageView @JvmOverloads constructor(
     private var borderColor = DEFAULT_BORDER_COLOR
     @Dimension(unit = Dimension.DP)
     private var borderWidth = convertDpToPixels(2f, context)
-    private var bitmap: Bitmap? = null
     private val bgColors = arrayOf(
         "#7BC862",
         "#E17076",
@@ -47,6 +46,15 @@ class AvatarImageView @JvmOverloads constructor(
         "#EE7AAE"
     )
 
+
+    init {
+        if (attrs != null) {
+            val a = context.obtainStyledAttributes(attrs, R.styleable.AvatarImageView)
+            borderColor = a.getColor(R.styleable.AvatarImageView_aiv_borderColor, DEFAULT_BORDER_COLOR)
+            borderWidth = a.getDimension(R.styleable.AvatarImageView_aiv_borderWidth, borderWidth)
+            a.recycle()
+        }
+    }
 
     override fun onDraw(canvas: Canvas) {
         var bitmap = getBitmapFromDrawable()
