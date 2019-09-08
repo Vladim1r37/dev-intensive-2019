@@ -12,6 +12,18 @@
         <item name="colorIcon">@color/color_gray</item>
         <item name="colorIconBackground">@color/color_gray</item>
         <item name="colorDivider">@color/color_divider_dark</item>
+        <item name="colorItemBackground">@android:color/white</item>
+        <item name="colorItemSelectedBackground">@color/color_gray_light</item>
+        <item name="colorTextTitle">@color/color_primary</item>
+        <item name="colorTextMessage">@color/color_gray_dark</item>
+        <item name="colorIndicatorBackground">@color/color_indicator</item>
+        <item name="colorOnlineIndicatorBackground">@color/color_green</item>
+        <item name="colorSelector">@color/color_primary</item>
+        <item name="colorChipBackground">@color/color_primary_light</item>
+        <item name="colorChipCloseIconTint">@android:color/white</item>
+        <item name="colorSwipeBackground">@color/color_primary_dark</item>
+        <item name="colorSnackbarBackground">@color/color_primary</item>
+        <item name="colorSnackbarText">@android:color/white</item>
 
         <item name="android:windowActivityTransitions">true</item>
         <item name="android:windowAnimationStyle">@style/ActivityTransitions</item>

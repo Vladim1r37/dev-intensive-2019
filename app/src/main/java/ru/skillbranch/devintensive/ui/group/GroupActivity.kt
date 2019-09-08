@@ -1,9 +1,11 @@
 package ru.skillbranch.devintensive.ui.group
 
+import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -105,8 +107,12 @@ class GroupActivity : AppCompatActivity() {
             isCloseIconVisible = true
             tag = user.id
             isClickable = true
-            closeIconTint = ColorStateList.valueOf(Color.WHITE)
-            chipBackgroundColor = ColorStateList.valueOf(getColor(R.color.color_primary_light))
+            val iconTintValue = TypedValue()
+            theme.resolveAttribute(R.attr.colorChipCloseIconTint, iconTintValue, true)
+            closeIconTint = ColorStateList.valueOf(iconTintValue.data)
+            val chipBgValue = TypedValue()
+            theme.resolveAttribute(R.attr.colorChipBackground, chipBgValue, true)
+            chipBackgroundColor = ColorStateList.valueOf(chipBgValue.data)
             setTextColor(Color.WHITE)
         }
         chip.setOnCloseIconClickListener { viewModel.handleRemoveChip(it.tag.toString()) }

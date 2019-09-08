@@ -18,4 +18,17 @@
     <attr name="colorDivider" format="reference"/>
     <attr name="colorIcon" format="reference"/>
     <attr name="colorIconBackground" format="reference"/>
+    <attr name="colorItemBackground" format="reference"/>
+    <attr name="colorItemSelectedBackground" format="reference"/>
+    <attr name="colorChipBackground" format="reference"/>
+    <attr name="colorChipCloseIconTint" format="reference"/>
+    <attr name="colorTextTitle" format="reference"/>
+    <attr name="colorTextMessage" format="reference"/>
+    <attr name="colorIndicatorBackground" format="reference"/>
+    <attr name="colorOnlineIndicatorBackground" format="reference"/>
+    <attr name="colorSelector" format="reference"/>
+    <attr name="colorSwipeBackground" format="reference"/>
+    <attr name="colorSnackbarBackground" format="reference"/>
+    <attr name="colorSnackbarText" format="reference"/>
+
 </resources>

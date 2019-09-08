@@ -1,8 +1,10 @@
 package ru.skillbranch.devintensive.ui.main
 
+import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.Menu
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.Observer
@@ -13,6 +15,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
 import ru.skillbranch.devintensive.R
+import ru.skillbranch.devintensive.extensions.withColor
+import ru.skillbranch.devintensive.extensions.withDrawableBackground
+import ru.skillbranch.devintensive.extensions.withTextColor
 import ru.skillbranch.devintensive.ui.adapters.ChatAdapter
 import ru.skillbranch.devintensive.ui.adapters.ChatItemTouchHelperCallback
 import ru.skillbranch.devintensive.ui.archive.ArchiveActivity
@@ -67,11 +72,14 @@ class MainActivity : AppCompatActivity() {
         val divider = DividerItemDecoration(this, DividerItemDecoration.VERTICAL)
         val touchCallback = ChatItemTouchHelperCallback(chatAdapter) {
             viewModel.addToArchive(it.id)
+            val typedValue = TypedValue()
+            theme.resolveAttribute(R.attr.colorSnackbarText, typedValue, true)
             val chatItem = it
             Snackbar.make(rv_chat_list, "Вы точно хотите добавить ${it.title} в архив?", Snackbar.LENGTH_LONG)
                 .setAction("отмена") {
                     viewModel.restoreFromArchive(chatItem.id)
-                }
+                }.withDrawableBackground(resources.getDrawable(R.drawable.bg_snackbar, theme))
+                .withTextColor(typedValue.data)
                 .show()
         }
         val touchHelper = ItemTouchHelper(touchCallback)
