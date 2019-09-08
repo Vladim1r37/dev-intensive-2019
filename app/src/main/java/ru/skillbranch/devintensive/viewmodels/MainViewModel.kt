@@ -57,43 +57,19 @@ class MainViewModel : ViewModel() {
     private fun loadArchivedChatItem(): ChatItem {
         val archivedChatItems = chatRepository.loadChats().value!!
             .filter { it.isArchived }
-            .map { it.toChatItem() }
+            .sortedBy { it.messages.lastOrNull()?.date }
 
-        var unreadMessagesCount = 0
-        var lastMessagePair: Pair<String?, String?> = "" to ""
-        var lastDate: Date? = null
-        for (chatItem in archivedChatItems) {
-            with(chatItem) {
-                unreadMessagesCount += messageCount
-                val lastMessageDateShort = lastMessageDate ?: ""
-                if (lastMessageDateShort.isNotEmpty()) {
-                    val pattern = if (lastMessageDateShort.contains("\\d\\d:\\d\\d".toRegex())) "HH:mm" else "dd.MM.yy"
-                    var newDate = SimpleDateFormat(pattern, Locale("ru")).parse(lastMessageDateShort)
-                    val calendar = Calendar.getInstance()
-                    calendar.time = newDate
-                    if (calendar.get(Calendar.YEAR) == 1970) {
-                        val currentDate = Calendar.getInstance()
-                        calendar.set(Calendar.YEAR, currentDate.get(Calendar.YEAR))
-                        calendar.set(Calendar.DAY_OF_YEAR, currentDate.get(Calendar.DAY_OF_YEAR))
-                        newDate = calendar.time
-                    }
-                    if (lastDate == null || lastDate!!.before(newDate)) {
-                        lastDate = newDate
-                        lastMessagePair = shortDescription to author
-                    }
-                }
-            }
-        }
         return ChatItem(
             "-1",
             null,
             "",
             "Архив чатов",
-            lastMessagePair.first,
-            unreadMessagesCount,
-            lastDate?.shortFormat(),
-            chatType = ChatType.ARCHIVE,
-            author = lastMessagePair.second
+            archivedChatItems.last().lastMessageShort().first,
+            archivedChatItems.sumBy { it.messages.filter { !it.isReaded }.count() },
+            archivedChatItems.last().lastMessageDate()?.shortFormat(),
+            false,
+            ChatType.ARCHIVE,
+            "@${archivedChatItems.last().lastMessageShort().second}"
         )
     }
 
